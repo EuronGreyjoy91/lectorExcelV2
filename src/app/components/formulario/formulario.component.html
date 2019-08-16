@@ -1,0 +1,88 @@
+<h1 class = "text-center">Procesador de datos de Facebook <small>v2.0.0</small></h1>
+<form [formGroup] = "formulario">
+    <div class="form-row has-danger">
+        <div class="col-md-12 mb-3">
+          <label for="file"><b>Archivo</b></label>
+          <input type="file" class="form-control" id="file" name = "file" #file formControlName = "file" accept=".csv">
+          <!--<div class = "form-control-feedback" *ngIf="formulario.controls.file.valid">
+              Perfecto!
+          </div>
+          <div class = "form-control-feedback" *ngIf="formulario.get('file').errors?.required">
+              Carga un archivo!
+          </div>-->
+        </div>
+    </div>
+  <div class="form-row">
+      <div class="col-md-12 mb-3">
+          <label for="telefono"><b>Tel&eacute;fono l&iacute;mite</b></label>
+          <input type="text" class="form-control" formControlName = "telefono">
+      </div>
+  </div>
+  <div class="form-check">
+	  <input class="form-check-input" type="checkbox" value="true" formControlName = "contactosMexico">
+	  <label class="form-check-label" for=contactosMexico>
+	    	<b>Contactos de Mexico?</b>
+	  </label>
+  </div>
+  <br>
+  <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="true" formControlName = "incluirMail">
+	  <label class="form-check-label" for=incluirMail>
+	    	<b>Incluir columna mail?</b>
+	  </label>
+  </div>
+  <br>
+
+  <button type="button" (click) = "onFileSelect(file.files)" class="btn btn-outline-success" style = "margin-top: 10px">
+      Procesar
+      <i class="fa fa-check" aria-hidden="true"></i>
+  </button>
+  <button type="button" (click) = "resetForm()" class="btn btn-outline-danger ml-3" style = "margin-top: 10px">
+      Limpiar
+      <i class="fa fa-times" aria-hidden="true"></i>
+  </button>
+</form>
+
+<div class = "text-center" *ngIf="loading">
+    <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
+
+<div *ngIf="processedData.length > 0" class = "mt-5">
+    <hr>
+    <h5>
+        <strong>Archivo:</strong>&nbsp;<i>{{ nombreArchivo }}</i>
+    </h5>
+    <h5>
+        <strong>Cantidad contactos:</strong> {{ processedData.length }}
+        <button type = "button" (click) = "copiarRegistros()" class = "btn btn-primary float-right">Copiar <i class="fa fa-clipboard" aria-hidden="true"></i></button>
+    </h5>
+
+    <table class="table mt-5">
+        <thead class="thead-dark">
+            <tr class = "text-center">
+                <th scope="col">#</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Tratamiento</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tel&eacute;fono</th>
+                <th scope="col" *ngIf="formulario.value.incluirMail">Email</th>
+                <th scope="col">Origen</th>
+                <th scope="col">Obs.</th>
+            </tr>
+        </thead>
+        <tbody class = "text-center">
+            <tr *ngFor="let contacto of processedData; index as i">
+                <th scope="row">{{ i + 1}}</th>
+                <td>{{ contacto.fecha | date: 'dd-MM'}}</td>
+                <td>{{ contacto.tratamiento }}</td>
+                <td>{{ contacto.nombre != null && contacto.nombre != "" && contacto.nombre != undefined ? (contacto.nombre | titlecase) : contacto.email }}</td>
+                <td>{{ contacto.telefono }}</td>
+                <td *ngIf="formulario.value.incluirMail">{{ contacto.email }}</td>
+                <td>{{ contacto.origen }}</td>
+                <td>{{ contacto.observaciones }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -11,11 +11,11 @@ import { ClipboardService } from 'ngx-clipboard';
 })
 export class FormularioComponent implements OnInit {
 
-  private formulario:FormGroup;
-  private csvData:string = "";
-  private parsedCsv:string[][];
-  private processedData:DataModel[];
-  private loading:boolean = false;
+  public formulario:FormGroup;
+  public csvData:string = "";
+  public parsedCsv:string[][];
+  public processedData:DataModel[];
+  public loading:boolean = false;
 
   constructor(private clipboardService: ClipboardService) {
       this.processedData = [];

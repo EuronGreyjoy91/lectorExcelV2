@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormArray } from "@angular/forms";
+import { FormGroup, FormControl, Validators } from "@angular/forms";
+import { DataModel } from '../../models/data.model';
 import { DataContacto } from '../../models/data.contacto.model';
 import { ClipboardService } from 'ngx-clipboard';
 
@@ -13,9 +14,8 @@ export class FormularioComponent implements OnInit {
   private formulario:FormGroup;
   private csvData:string = "";
   private parsedCsv:string[][];
-  private processedData:DataContacto[];
+  private processedData:DataModel[];
   private loading:boolean = false;
-  private nombreArchivo:string;
 
   constructor(private clipboardService: ClipboardService) {
       this.processedData = [];
@@ -32,11 +32,10 @@ export class FormularioComponent implements OnInit {
 
   }
 
-  private copiarRegistros(){
-
+  private copiarRegistros(index:number){
       let string = "";
 
-      this.processedData.forEach(dataContacto => {
+      this.processedData[index].dataContactos.forEach(dataContacto => {
          let linea = "";
 
          linea += this.processDate(dataContacto.fecha) + "\u200e" + "\t";
@@ -54,13 +53,14 @@ export class FormularioComponent implements OnInit {
       });
 
       this.clipboardService.copyFromContent(string);
+
   }
 
   private processDate(date:Date):string{
       let month:any = date.getMonth() + 1;
 
       if(month < 10)
-        month = "0" + month;
+          month = "0" + month;
 
       return date.getDate() + "-" + month;
   }
@@ -71,9 +71,8 @@ export class FormularioComponent implements OnInit {
   }
 
   private onFileSelect(files: FileList) {
-
+      this.processedData = [];
       console.log(this.formulario);
-      console.log(files);
 
       if(this.formulario.valid){
           let telefono = this.formulario.value.telefono;
@@ -83,127 +82,133 @@ export class FormularioComponent implements OnInit {
               this.loading = true;
 
               setTimeout( () => {
-                  let file : File = files.item(0);
-                  this.nombreArchivo = file.name;
+                  for(let i:number = 0; i < files.length; i++){
+                      let dataModel:DataModel = new DataModel();
 
-                  let reader: FileReader = new FileReader();
-                  reader.readAsText(file);
-                  reader.onload = (e) => {
-                      let csv: string = reader.result as string;
+                      let file : File = files.item(i);
+                      dataModel.file = file;
 
-                      const CSV_SEPARATOR = /(?:[^\s"]+|"[^"]*")+/g;
-                      const CSV = [];
-                      const LINES = csv.split('\n');
-                      let cols: string[];
+                      let reader: FileReader = new FileReader();
+                      reader.readAsText(file);
+                      reader.onload = (e) => {
+                          let csv: string = reader.result as string;
 
-                      LINES.forEach(element => {
-                          cols = element.match(CSV_SEPARATOR);
-                          CSV.push(cols);
-                      });
+                          const CSV_SEPARATOR = /(?:[^\s"]+|"[^"]*")+/g;
+                          const CSV = [];
+                          const LINES = csv.split('\n');
+                          let cols: string[];
 
-                      this.parsedCsv = CSV;
+                          LINES.forEach(element => {
+                              cols = element.match(CSV_SEPARATOR);
+                              CSV.push(cols);
+                          });
 
-                      let columnaNombre:number = null;
-                      let columnaTelefono:number = null;
-                      let columnaMail:number = null;
+                          this.parsedCsv = CSV;
 
-                      let index = 0;
-                      this.parsedCsv[0].forEach(element => {
-                          if(element === "full_name")
-                          columnaNombre = index;
-                          else if(element === "phone_number")
-                          columnaTelefono = index;
-                          else if(element === "email")
-                          columnaMail = index;
+                          let columnaNombre:number = null;
+                          let columnaTelefono:number = null;
+                          let columnaMail:number = null;
 
-                          index++;
-                      })
+                          let index = 0;
+                          this.parsedCsv[0].forEach(element => {
+                              if(element === "full_name" || element === "nombre_completo")
+                                  columnaNombre = index;
+                              else if(element === "phone_number" || element === "número_de_teléfono")
+                                  columnaTelefono = index;
+                              else if(element === "email")
+                                  columnaMail = index;
 
-                      let dataContactos:DataContacto[] = [];
+                              index++;
+                          })
 
-                      let limiteAlcanzado = false;
+                          let dataContactos:DataContacto[] = [];
+                          let limiteAlcanzado = false;
 
-                      this.parsedCsv.forEach((row : any, i :any)  => {
-                          let dataContacto:DataContacto;
+                          this.parsedCsv.forEach((row : any, j :any)  => {
+                              let dataContacto:DataContacto;
 
-                          if(row != null && i != 0 && !limiteAlcanzado){
-                              dataContacto = new DataContacto();
-                              dataContacto.fecha = new Date();
-                              dataContacto.tratamiento = "Clientes potenciales";
-                              dataContacto.nombre = row[columnaNombre];
+                              if(row != null && j != 0 && !limiteAlcanzado){
+                                  dataContacto = new DataContacto();
+                                  dataContacto.fecha = new Date();
+                                  dataContacto.tratamiento = "Clientes potenciales";
+                                  dataContacto.nombre = row[columnaNombre];
 
-                              let nombre = row[columnaNombre];
-                              nombre = nombre.replace("á", "a")
-                              .replace("é", "e")
-                              .replace("í", "i")
-                              .replace("ó", "o")
-                              .replace("ú", "u")
-                              .replace("Á", "A")
-                              .replace("É", "E")
-                              .replace("Í", "I")
-                              .replace("Ó", "O")
-                              .replace("Ú", "U")
-                              .replace(/[^\w\s]/gi, '')
-                              .trim();
+                                  let nombre = row[columnaNombre];
+                                  nombre = nombre.replace("á", "a")
+                                  .replace("é", "e")
+                                  .replace("í", "i")
+                                  .replace("ó", "o")
+                                  .replace("ú", "u")
+                                  .replace("Á", "A")
+                                  .replace("É", "E")
+                                  .replace("Í", "I")
+                                  .replace("Ó", "O")
+                                  .replace("Ú", "U")
+                                  .replace(/[^\w\s\ñ\Ñ]/gi, '')
+                                  .trim();
 
-                              dataContacto.nombre = nombre;
+                                  dataContacto.nombre = nombre;
 
-                              dataContacto.telefono = row[columnaTelefono];
-                              dataContacto.email = row[columnaMail];
+                                  dataContacto.telefono = row[columnaTelefono];
+                                  dataContacto.email = row[columnaMail];
 
-                              if(contactosMexico) {
-                                  dataContacto.telefono = dataContacto.telefono.replace("p:", "");
+                                  if(contactosMexico) {
+                                      dataContacto.telefono = dataContacto.telefono.replace("p:", "");
 
-                                  if(!dataContacto.telefono.startsWith("+"))
-                                  dataContacto.telefono = "+" + dataContacto.telefono;
+                                      if(!dataContacto.telefono.startsWith("+"))
+                                          dataContacto.telefono = "+" + dataContacto.telefono;
 
-                                  if(telefono != null && telefono != "") {
-                                      telefono = telefono.replace("p:", "");
+                                      if(telefono != null && telefono != "") {
+                                          telefono = telefono.replace("p:", "");
 
-                                      if(!telefono.startsWith("+"))
-                                      telefono = "+" + telefono;
-                                  }
-                              }
-                              else {
-                                  dataContacto.telefono = dataContacto.telefono.replace("+", "").replace("p:", "");
-
-                                  if(dataContacto.telefono.length >= 12){
-                                      if(dataContacto.telefono.startsWith("549") || dataContacto.telefono.startsWith("540"))
-                                      dataContacto.telefono = dataContacto.telefono.substring(3);
-                                      else if(dataContacto.telefono.startsWith("54"))
-                                      dataContacto.telefono = dataContacto.telefono.substring(2);
-                                  }
-
-                                  if(telefono != null && telefono != "") {
-                                      telefono = telefono.replace("+", "").replace("p:", "");
-
-                                      if(telefono.length >= 12){
-                                          if(telefono.startsWith("549") || telefono.startsWith("540"))
-                                          telefono = telefono.substring(3);
-                                          else if(telefono.startsWith("54"))
-                                          telefono = telefono.substring(2);
+                                          if(!telefono.startsWith("+"))
+                                              telefono = "+" + telefono;
                                       }
                                   }
+                                  else {
+                                      dataContacto.telefono = dataContacto.telefono.replace("+", "").replace("p:", "");
+
+                                      if(dataContacto.telefono.length >= 12){
+                                          if(dataContacto.telefono.startsWith("549") || dataContacto.telefono.startsWith("540"))
+                                              dataContacto.telefono = dataContacto.telefono.substring(3);
+                                          else if(dataContacto.telefono.startsWith("54"))
+                                              dataContacto.telefono = dataContacto.telefono.substring(2);
+                                      }
+
+                                      if(telefono != null && telefono != "") {
+                                          telefono = telefono.replace("+", "").replace("p:", "");
+
+                                          if(telefono.length >= 12){
+                                              if(telefono.startsWith("549") || telefono.startsWith("540"))
+                                                  telefono = telefono.substring(3);
+                                              else if(telefono.startsWith("54"))
+                                                  telefono = telefono.substring(2);
+                                          }
+                                      }
+                                  }
+
+                                  dataContacto.origen = "Facebook";
+                                  dataContacto.observaciones = "-";
+
+                                  if(telefono != null && telefono != "")
+                                      if(telefono.trim() == dataContacto.telefono.trim())
+                                          limiteAlcanzado = true;
+
+                                  if(!limiteAlcanzado)
+                                      dataContactos.push(dataContacto);
                               }
+                          });
 
-                              dataContacto.origen = "Facebook";
-                              dataContacto.observaciones = "-";
+                          dataModel.dataContactos = dataContactos;
+                      }
 
-                              if(telefono != null && telefono != "")
-                              if(telefono.trim() == dataContacto.telefono.trim())
-                              limiteAlcanzado = true;
-
-                              if(!limiteAlcanzado)
-                              dataContactos.push(dataContacto);
-                          }
-                      });
-
-                      this.processedData = dataContactos;
-                      this.loading = false;
+                      this.processedData.push(dataModel);
                   }
+
+                  this.loading = false;
+
               }, 500);
           }
       }
   }
-
 }

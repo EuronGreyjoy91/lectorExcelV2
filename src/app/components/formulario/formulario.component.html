@@ -2,14 +2,10 @@
 <form [formGroup] = "formulario">
     <div class="form-row has-danger">
         <div class="col-md-12 mb-3">
-          <label for="file"><b>Archivo</b></label>
-          <input type="file" class="form-control" id="file" name = "file" #file formControlName = "file" accept=".csv">
-          <!--<div class = "form-control-feedback" *ngIf="formulario.controls.file.valid">
-              Perfecto!
-          </div>
-          <div class = "form-control-feedback" *ngIf="formulario.get('file').errors?.required">
-              Carga un archivo!
-          </div>-->
+          <label for="file"><b>Archivos</b></label>
+          <input type="file" class="form-control" [ngClass]="{'is-valid': formulario.valid, 'is-invalid' : formulario.controls.file.errors?.required}" id="file" name = "file" #file formControlName = "file" accept=".csv" multiple>
+          <div class="valid-feedback">Perfecto</div>
+          <div class="invalid-feedback">Carga uno o m&aacute;s archivos</div>
         </div>
     </div>
   <div class="form-row">
@@ -49,40 +45,42 @@
     </div>
 </div>
 
-<div *ngIf="processedData.length > 0" class = "mt-5">
-    <hr>
-    <h5>
-        <strong>Archivo:</strong>&nbsp;<i>{{ nombreArchivo }}</i>
-    </h5>
-    <h5>
-        <strong>Cantidad de contactos:</strong> {{ processedData.length }}
-        <button type = "button" (click) = "copiarRegistros()" class = "btn btn-primary float-right">Copiar <i class="fa fa-clipboard" aria-hidden="true"></i></button>
-    </h5>
+<div *ngIf="processedData.length > 0" class = "mt-5 animated fadeIn fast">
+    <div *ngFor="let dataModel of processedData; index as i">
+        <hr>
+        <h5>
+            <strong>Archivo:</strong>&nbsp;<i>{{ dataModel?.file?.name }}</i>
+        </h5>
+        <h5>
+            <strong>Cantidad de contactos:</strong> {{ dataModel?.dataContactos?.length }}
+            <button type = "button"  tooltip="Copiar registros" (click) = "copiarRegistros(i)" tooltip="Copiado!" placement="left" trigger = "click" class = "btn btn-primary float-right">Copiar <i class="fa fa-clipboard" aria-hidden="true"></i></button>
+        </h5>
 
-    <table class="table mt-5">
-        <thead class="thead-dark">
-            <tr class = "text-center">
-                <th scope="col">#</th>
-                <th scope="col">Fecha</th>
-                <th scope="col">Tratamiento</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Tel&eacute;fono</th>
-                <th scope="col" *ngIf="formulario.value.incluirMail">Email</th>
-                <th scope="col">Origen</th>
-                <th scope="col">Obs.</th>
-            </tr>
-        </thead>
-        <tbody class = "text-center">
-            <tr *ngFor="let contacto of processedData; index as i">
-                <th scope="row">{{ i + 1}}</th>
-                <td>{{ contacto.fecha | date: 'dd-MM'}}</td>
-                <td>{{ contacto.tratamiento }}</td>
-                <td>{{ contacto.nombre != null && contacto.nombre != "" && contacto.nombre != undefined ? (contacto.nombre | titlecase) : contacto.email }}</td>
-                <td>{{ contacto.telefono }}</td>
-                <td *ngIf="formulario.value.incluirMail">{{ contacto.email }}</td>
-                <td>{{ contacto.origen }}</td>
-                <td>{{ contacto.observaciones }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <table class="table mt-5">
+            <thead class="thead-dark">
+                <tr class = "text-center">
+                    <th scope="col">#</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Tratamiento</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Tel&eacute;fono</th>
+                    <th scope="col" *ngIf="formulario.value.incluirMail">Email</th>
+                    <th scope="col">Origen</th>
+                    <th scope="col">Obs.</th>
+                </tr>
+            </thead>
+            <tbody class = "text-center">
+                <tr *ngFor="let contacto of dataModel.dataContactos; index as j">
+                    <th scope="row">{{ j + 1}}</th>
+                    <td>{{ contacto.fecha | date: 'dd-MM'}}</td>
+                    <td>{{ contacto.tratamiento }}</td>
+                    <td>{{ contacto.nombre != null && contacto.nombre != "" && contacto.nombre != undefined ? (contacto.nombre | titlecase) : contacto.email }}</td>
+                    <td>{{ contacto.telefono }}</td>
+                    <td *ngIf="formulario.value.incluirMail">{{ contacto.email }}</td>
+                    <td>{{ contacto.origen }}</td>
+                    <td>{{ contacto.observaciones }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

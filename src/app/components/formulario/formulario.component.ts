@@ -32,7 +32,7 @@ export class FormularioComponent implements OnInit {
 
   }
 
-  private copiarRegistros(index:number){
+  public copiarRegistros(index:number){
       let string = "";
 
       this.processedData[index].dataContactos.forEach(dataContacto => {
@@ -56,7 +56,7 @@ export class FormularioComponent implements OnInit {
 
   }
 
-  private processDate(date:Date):string{
+  public processDate(date:Date):string{
       let month:any = date.getMonth() + 1;
 
       if(month < 10)
@@ -65,12 +65,12 @@ export class FormularioComponent implements OnInit {
       return date.getDate() + "-" + month;
   }
 
-  private resetForm(){
+  public resetForm(){
       this.formulario.reset({ incluirMail: true });
       this.processedData = [];
   }
 
-  private onFileSelect(files: FileList) {
+  public onFileSelect(files: FileList) {
       this.processedData = [];
       console.log(this.formulario);
 

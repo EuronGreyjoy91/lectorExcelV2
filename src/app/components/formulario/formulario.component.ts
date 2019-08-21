@@ -160,6 +160,7 @@ export class FormularioComponent implements OnInit {
 
                                       if(telefono != null && telefono != "") {
                                           telefono = telefono.replace("p:", "");
+                                          telefono = telefono.replace("\u200e", "").replace("\t", "");
 
                                           if(!telefono.startsWith("+"))
                                               telefono = "+" + telefono;
@@ -177,6 +178,7 @@ export class FormularioComponent implements OnInit {
 
                                       if(telefono != null && telefono != "") {
                                           telefono = telefono.replace("+", "").replace("p:", "");
+                                          telefono = telefono.replace("\u200e", "").replace("\t", "");
 
                                           if(telefono.length >= 12){
                                               if(telefono.startsWith("549") || telefono.startsWith("540"))

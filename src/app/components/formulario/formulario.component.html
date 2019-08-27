@@ -28,6 +28,13 @@
 	  </label>
   </div>
   <br>
+  <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="true" formControlName = "incluirColumnaTratamiento">
+	  <label class="form-check-label" for=incluirColumnaTratamiento>
+	    	<b>Incluir columna tratamiento?</b>
+	  </label>
+  </div>
+  <br>
 
   <button type="button" (click) = "onFileSelect(file.files)" class="btn btn-outline-success" style = "margin-top: 10px">
       Procesar
@@ -61,7 +68,7 @@
                 <tr class = "text-center">
                     <th scope="col">#</th>
                     <th scope="col">Fecha</th>
-                    <th scope="col">Tratamiento</th>
+                    <th scope="col" *ngIf="formulario.value.incluirColumnaTratamiento">Tratamiento</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Tel&eacute;fono</th>
                     <th scope="col" *ngIf="formulario.value.incluirMail">Email</th>
@@ -73,7 +80,7 @@
                 <tr *ngFor="let contacto of dataModel.dataContactos; index as j">
                     <th scope="row">{{ j + 1}}</th>
                     <td>{{ contacto.fecha | date: 'dd-MM'}}</td>
-                    <td>{{ contacto.tratamiento }}</td>
+                    <td *ngIf="formulario.value.incluirColumnaTratamiento">{{ contacto.tratamiento }}</td>
                     <td>{{ contacto.nombre != null && contacto.nombre != "" && contacto.nombre != undefined ? (contacto.nombre | titlecase) : contacto.email }}</td>
                     <td>{{ contacto.telefono }}</td>
                     <td *ngIf="formulario.value.incluirMail">{{ contacto.email }}</td>

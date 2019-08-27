@@ -28,6 +28,7 @@ export class FormularioComponent implements OnInit {
           "telefono" : new FormControl(""),
           "contactosMexico" : new FormControl(""),
           "incluirMail" : new FormControl("true"),
+          "incluirColumnaTratamiento" : new FormControl("true"),
       });
 
   }
@@ -39,7 +40,10 @@ export class FormularioComponent implements OnInit {
          let linea = "";
 
          linea += this.processDate(dataContacto.fecha) + "\u200e" + "\t";
-         linea += dataContacto.tratamiento + "\t";
+
+         if(this.formulario.value.incluirColumnaTratamiento)
+            linea += dataContacto.tratamiento + "\t";
+
          linea += dataContacto.nombre + "\t";
          linea += dataContacto.telefono + "\u200e" + "\t";
 
